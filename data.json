@@ -1,0 +1,31 @@
+{
+  "users": [
+    {
+      "id": "usr_mu4o70cg_1256f053",
+      "name": "Administrador",
+      "email": "rhuanprodutor3@gmail.com",
+      "role": "admin",
+      "passwordHash": "3a831fd9daa2b0af9e7ce4ae1f44d70b:709f978448a5a0ca91e1df6ac141cb6e0742630138ba57ea4a458b759bcbe221ac620102e3d42c92198dd4e13053184a01a20cd57e94608ac50230f3f78ca6d0",
+      "createdAt": "2026-09-16T22:26:22.806Z"
+    }
+  ],
+  "news": [],
+  "store": [],
+  "partners": [],
+  "team": [],
+  "creators": [],
+  "minecraftPlayers": [],
+  "minecraftStatus": {
+    "online": 0,
+    "max": 0,
+    "updatedAt": null
+  },
+  "settings": {
+    "siteName": "Flansland",
+    "serverIp": "flansland.fun",
+    "discordUrl": "https://dsc.gg/flansland",
+    "announcementTitle": "Novidades da Flansland",
+    "announcementText": "Entre no servidor e acompanhe os próximos eventos da comunidade.",
+    "rulesText": "📜 Regras\n\nEste servidor foi estabelecido para promover um ambiente harmonioso e bem organizado. Ao se juntar, você aceita os regulamentos a seguir.\n\n1️⃣ Convivência e respeito\nÉ estritamente proibido qualquer tipo de desrespeito. Isso inclui insultos, ameaças, discriminação, discursos de ódio, perseguições, assédios ou a divulgação de dados pessoais. Comentários provocativos, insinuações e ataques contra a equipe ou outros participantes podem resultar em punições imediatas.\n\n2️⃣ Divulgação e autopromoção\nA divulgação de servidores, redes sociais, canais, produtos, serviços, links externos ou qualquer tipo de propaganda é vetada sem a autorização prévia da equipe. Propagar cheats, hacks, exploits ou outros conteúdos ilegais é absolutamente proibido.\n\n3️⃣ Uso do chat\nÉ importante evitar mensagens repetitivas, flood, spam, uso excessivo de CAPS LOCK, correntes ou qualquer poluição visual no chat. Comportamentos que impeçam a comunicação adequada serão punidos.\n\n4️⃣ Conduta inadequada\nComportamentos que tenham como objetivo provocar, confundir ou prejudicar outros usuários são inaceitáveis. Isso inclui fingir ser outra pessoa, abusar de menções, usar bots de forma inadequada, ou tentar burlar regras ou sistemas do servidor.\n\n5️⃣ Conteúdo permitido\nTodo material compartilhado deve ser adequado para todas as idades. É proibido divulgar conteúdo NSFW, ilegal ou ofensivo. Os usuários devem obedecer aos Termos e Diretrizes do Discord.\n\n6️⃣ Desordem e tumulto\nCriar confusão intencionalmente, incentivar brigas, espalhar rumores ou tentar desestabilizar o servidor vai contra o propósito da comunidade e resultará em punição.\n\n7️⃣ Autoridade da staff\nA equipe admin possui total autoridade para interpretar e aplicar as regras. As punições podem variar de acordo com a gravidade da infração e podem ser aplicadas sem aviso prévio.\n\nFlansland — Todos os direitos reservados."
+  }
+}

@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Painel administrativo • Flansland</title>
+    <meta name="description" content="Painel administrativo da Flansland para gerenciamento da plataforma e da comunidade.">
+    <meta name="robots" content="noindex, nofollow">
+    <link rel="icon" type="image/png" href="assets/flansland-logo.png">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="admin.css">
+  </head>
+  <body class="admin-page">
+    <main class="admin-shell">
+      <section class="admin-auth" id="admin-auth">
+        <img src="assets/flansland-logo.png" alt="Flansland">
+        <span class="eyebrow">FLANSLAND</span>
+        <h1 id="admin-auth-title">Acesso administrativo</h1>
+        <p id="admin-auth-description">Entre com o e-mail autorizado para acessar o painel.</p>
+        <form id="admin-auth-form">
+          <label>E-mail autorizado<input id="admin-email" type="email" value="rhuanprodutor3@gmail.com" required></label>
+          <label>Senha<input id="admin-password" type="password" minlength="8" required></label>
+          <label id="admin-name-wrap" hidden>Nome<input id="admin-name" type="text" value="Administrador"></label>
+          <button class="auth-submit" type="submit">Entrar no painel</button>
+          <p class="form-message" id="admin-auth-message"></p>
+        </form>
+      </section>
+
+      <section class="dashboard" id="dashboard" hidden>
+        <header class="dashboard-header">
+          <div><span class="eyebrow">PAINEL FLANSLAND</span><h1>Administração</h1></div>
+          <div class="dashboard-actions"><a href="/">Ver site</a><button id="logout-button">Sair</button></div>
+        </header>
+        <nav class="admin-tabs">
+          <button class="active" data-tab="overview">Visão geral</button>
+          <button data-tab="users">Acessos</button>
+          <button data-tab="news">Notícias</button>
+          <button data-tab="store">Loja</button>
+          <button data-tab="partners">Servidores parceiros</button>
+          <button data-tab="team">Equipe</button>
+          <button data-tab="creators">Creators</button>
+          <button data-tab="rules">Regras</button>
+          <button data-tab="settings">Configurações</button>
+        </nav>
+
+        <section class="admin-tab active" id="tab-overview">
+          <div class="admin-cards"><article><strong id="count-users">0</strong><span>Acessos</span></article><article><strong id="count-news">0</strong><span>Notícias</span></article><article><strong id="count-store">0</strong><span>Itens na loja</span></article></div>
+          <div class="admin-help"><h2>Bem-vindo ao painel</h2><p>Edite o conteúdo da Flansland sem mexer no código: notícias, loja, servidores parceiros, textos do site e acessos ficam organizados nas abas acima.</p></div>
+        </section>
+
+        <section class="admin-tab" id="tab-users">
+          <div class="admin-section-title"><div><span class="eyebrow">CONTAS</span><h2>Criar novo acesso</h2></div></div>
+          <form class="admin-form form-grid" id="user-form"><input name="name" placeholder="Nome do jogador" required><input name="email" type="email" placeholder="E-mail" required><input name="password" type="password" minlength="8" placeholder="Senha (mínimo 8 caracteres)" required><select name="role"><option value="user">Usuário</option><option value="admin">Administrador</option></select><button class="auth-submit" type="submit">Criar acesso</button></form>
+          <div class="admin-table-wrap"><table><thead><tr><th>Nome</th><th>E-mail</th><th>Perfil</th><th></th></tr></thead><tbody id="users-table"></tbody></table></div>
+        </section>
+
+        <section class="admin-tab" id="tab-news">
+          <div class="admin-section-title"><div><span class="eyebrow">CONTEÚDO</span><h2>Criar notícia</h2></div></div>
+          <form class="admin-form" id="news-form"><input name="title" placeholder="Título da notícia" required><select name="category"><option>EVENTO</option><option>ATUALIZAÇÃO</option><option>COMUNIDADE</option><option>AVISO</option></select><textarea name="body" rows="4" placeholder="Texto da notícia" required></textarea><label class="file-field">Foto da notícia<input name="imageFile" type="file" accept="image/png,image/jpeg,image/webp"></label><button class="auth-submit" type="submit">Publicar notícia</button></form>
+          <div class="admin-list" id="news-list"></div>
+        </section>
+
+        <section class="admin-tab" id="tab-store">
+          <div class="admin-section-title"><div><span class="eyebrow">LOJA</span><h2>Adicionar item</h2></div></div>
+          <form class="admin-form" id="store-form"><input name="name" placeholder="Nome do item" required><select name="category"><option>RANKS</option><option>CAIXAS</option><option>MOEDAS</option><option>KITS</option><option>OUTROS</option></select><input name="price" placeholder="Preço, exemplo: R$ 19,90" required><textarea name="description" rows="3" placeholder="Descrição do item"></textarea><label class="featured-check"><input name="featured" type="checkbox"> Destacar como mais vendido</label><label class="file-field">Foto do produto<input name="imageFile" type="file" accept="image/png,image/jpeg,image/webp"></label><button class="auth-submit" type="submit">Adicionar à loja</button></form>
+          <div class="admin-list" id="store-list"></div>
+        </section>
+
+        <section class="admin-tab" id="tab-partners">
+          <div class="admin-section-title"><div><span class="eyebrow">NETWORK</span><h2>Servidores parceiros</h2></div></div>
+          <p class="admin-muted">Eles aparecem em uma faixa em movimento na página inicial.</p>
+          <form class="admin-form" id="partner-form"><input name="name" placeholder="Nome do servidor" required><input name="address" placeholder="IP ou endereço do servidor" required><input name="link" placeholder="Link do site ou Discord (opcional)"><input name="description" placeholder="Descrição curta (opcional)"><label class="file-field">Logo do parceiro<input name="imageFile" type="file" accept="image/png,image/jpeg,image/webp"></label><button class="auth-submit" type="submit">Adicionar parceiro</button></form>
+          <div class="admin-list" id="partners-list"></div>
+        </section>
+
+        <section class="admin-tab" id="tab-team">
+          <div class="admin-section-title"><div><span class="eyebrow">STAFF</span><h2>Equipe</h2></div></div>
+          <p class="admin-muted">Cadastre o nick, Discord, função e skin de cada pessoa da equipe.</p>
+          <form class="admin-form" id="team-form"><input name="nick" placeholder="Nick no Minecraft" required><input name="discord" placeholder="Discord da pessoa" required><select name="role"><option>Dono</option><option>Developer</option><option>Administrador</option><option>Coordenador</option><option>Moderação+</option><option>Moderação</option><option>Trial Moderador</option><option>Suporte</option><option>Builder</option><option>Studio</option></select><input name="skinNick" placeholder="Nick usado para puxar a face da skin (opcional)"><input name="description" placeholder="Descrição curta (opcional)"><button class="auth-submit" type="submit">Adicionar à equipe</button></form>
+          <div class="admin-list" id="team-list"></div>
+        </section>
+
+        <section class="admin-tab" id="tab-creators">
+          <div class="admin-section-title"><div><span class="eyebrow">CREATOR PROGRAM</span><h2>Creators</h2></div></div>
+          <p class="admin-muted">Adicione quem grava e divulga a Flansland. As cores de Creator e Creator+ são aplicadas automaticamente.</p>
+          <form class="admin-form" id="creator-form"><input name="nick" placeholder="Nick no Minecraft" required><input name="discord" placeholder="Discord da pessoa" required><select name="role"><option>Creator</option><option>Creator+</option></select><input name="skinNick" placeholder="Nick usado para puxar a face da skin (opcional)"><input name="description" placeholder="Canal ou descrição (opcional)"><button class="auth-submit" type="submit">Adicionar creator</button></form>
+          <div class="admin-list" id="creators-list"></div>
+          <div class="creator-ticket-admin"><strong>Deseja virar creator?</strong><a href="https://discord.com/channels/1549100473506734160/1549100478447747153" target="_blank" rel="noreferrer">Abrir ticket no Discord ↗</a></div>
+        </section>
+
+        <section class="admin-tab" id="tab-rules">
+          <div class="admin-section-title"><div><span class="eyebrow">COMUNIDADE</span><h2>📜 Regras</h2></div></div>
+          <p class="admin-muted">Este texto aparece na página pública de regras.</p>
+          <form class="admin-form" id="rules-form"><textarea name="rulesText" id="rules-text" rows="22" placeholder="Escreva as regras da comunidade"></textarea><button class="auth-submit" type="submit">Salvar regras</button></form>
+        </section>
+
+        <section class="admin-tab" id="tab-settings">
+          <div class="admin-section-title"><div><span class="eyebrow">IDENTIDADE</span><h2>Configurações do site</h2></div></div>
+          <p class="admin-muted">Altere textos e links que aparecem na página inicial.</p>
+          <form class="admin-form" id="settings-form">
+            <input name="siteName" placeholder="Nome do site">
+            <input name="serverIp" placeholder="IP do servidor">
+            <input name="discordUrl" type="url" placeholder="Link do Discord">
+            <input name="announcementTitle" placeholder="Título do aviso">
+            <textarea name="announcementText" rows="3" placeholder="Texto do aviso"></textarea>
+            <button class="auth-submit" type="submit">Salvar configurações</button>
+          </form>
+        </section>
+      </section>
+    </main>
+    <script src="admin.js"></script>
+  </body>
+</html>

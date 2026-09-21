@@ -1,0 +1,25 @@
+# Flansland
+
+> Flansland é uma comunidade de Minecraft com informações sobre o servidor, notícias, regras, loja e comunidade.
+
+## Site
+
+- [Página inicial](https://flansland.fun/): Página principal da Flansland.
+- [Notícias](https://flansland.fun/noticias): Notícias e novidades da comunidade.
+- [Regras](https://flansland.fun/regras): Regras oficiais da comunidade.
+- [Comunidade](https://flansland.fun/comunidade): Informações sobre a comunidade.
+- [Loja](https://flansland.fun/loja): Produtos e informações da loja.
+- [Cliente](https://flansland.fun/cliente): Área do usuário.
+
+## Minecraft
+
+- [Servidor Minecraft](https://flansland.fun/): Informações sobre o servidor Minecraft Flansland.
+- [Status do servidor](https://flansland.fun/): Informações sobre jogadores e disponibilidade do servidor.
+
+## Contato
+
+- [Discord](https://dsc.gg/flansland): Comunidade oficial da Flansland no Discord.
+
+## Optional
+
+- [Login](https://flansland.fun/cliente): Área de login e conta dos jogadores.
