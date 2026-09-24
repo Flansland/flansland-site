@@ -1,0 +1,14 @@
+User-agent: *
+Allow: /
+
+# Áreas que não precisam ser indexadas
+Disallow: /admin
+Disallow: /api/
+Disallow: /auth/
+Disallow: /logout
+
+# Arquivos de configuração e dados
+Disallow: /*.json$
+
+# Sitemap
+Sitemap: https://flansland.fun/sitemap.xml
