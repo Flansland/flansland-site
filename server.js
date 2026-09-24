@@ -5,7 +5,7 @@ const crypto = require("node:crypto");
 const { URL } = require("node:url");
 
 const PORT = Number(process.env.PORT || 3000);
-const HOST = process.env.HOST || "127.0.0.1";
+const HOST = process.env.HOST || "127.0.0.1"; 
 const ADMIN_EMAIL = "rhuanprodutor3@gmail.com";
 const MINECRAFT_API_KEY = process.env.MINECRAFT_API_KEY || "";
 const MINECRAFT_STATUS_TIMEOUT_MS = Math.max(30_000, Number(process.env.MINECRAFT_STATUS_TIMEOUT_MS || 90_000));
