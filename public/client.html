@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Minha conta • Flansland</title><link rel="icon" href="assets/flansland-logo.png">
+    <link rel="stylesheet" href="client.css">
+  </head>
+  <body class="client-page">
+    <div class="client-shell">
+      <header class="client-topbar">
+        <a class="client-brand" href="/"><img src="assets/flansland-logo.png" alt=""><strong>Flansland</strong></a>
+        <nav><a href="/">Início</a><a href="/noticias">Notícias</a><a href="/loja">Loja</a><a href="https://dsc.gg/flansland" target="_blank" rel="noreferrer">Discord ↗</a><button id="client-logout">Sair</button></nav>
+      </header>
+      <main class="client-layout">
+        <aside class="client-sidebar">
+          <div class="client-profile-mini"><div class="skin-face mini" id="mini-face">F</div><strong id="mini-name">Carregando...</strong><small id="mini-email"></small></div>
+          <div class="client-menu"><button class="active" data-view="overview">▦ <span>Visão geral</span></button><button data-view="profile">◉ <span>Meu perfil</span></button><a href="/loja">▣ <span>Loja Flansland</span></a><a href="https://dsc.gg/flansland" target="_blank" rel="noreferrer">◌ <span>Suporte Discord</span></a></div>
+          <small class="client-side-note">Sua conta Flansland</small>
+        </aside>
+        <section class="client-content">
+          <section class="client-view active" id="view-overview">
+            <div class="client-heading"><div><span class="client-kicker">ÁREA DO CLIENTE</span><h1>Visão geral</h1><p>Bem-vindo de volta, <strong id="welcome-name">jogador</strong>.</p></div><a class="client-action" href="/loja">Explorar loja ↗</a></div>
+            <div class="client-hero-card"><div><span>STATUS DA CONTA</span><h2>Pronto para jogar?</h2><p>Entre no servidor e acompanhe sua última atividade no Minecraft.</p></div><div class="client-server-pill"><i></i><strong>flansland.fun</strong><button data-copy="flansland.fun">Copiar IP</button></div></div>
+            <div class="client-stats"><article><small>CONTA CRIADA EM</small><strong id="account-created">—</strong></article><article><small>NICK NO MINECRAFT</small><strong id="minecraft-nick">Não informado</strong></article><article><small>ÚLTIMA ENTRADA NO MINE</small><strong id="minecraft-last-seen">Ainda não registrada</strong></article></div>
+            <div class="client-columns"><section class="client-panel"><div class="client-panel-heading"><h2>Seu personagem</h2><span>SKIN</span></div><div class="skin-card"><div class="skin-face large" id="large-face">F</div><div><h3 id="skin-name">Defina seu nick</h3><p>A face da sua skin aparece aqui quando você informar seu nick do Minecraft.</p><button class="client-outline" data-open-profile>Editar perfil</button></div></div></section><section class="client-panel"><div class="client-panel-heading"><h2>Mais vendidos</h2><a href="/loja">Ver loja →</a></div><div id="client-featured-store" class="client-small-list"></div></section></div>
+            <section class="client-panel client-news-panel"><div class="client-panel-heading"><h2>Notícias recentes</h2><a href="/noticias">Ver todas →</a></div><div id="client-news" class="client-news-list"></div></section>
+          </section>
+          <section class="client-view" id="view-profile">
+            <div class="client-heading"><div><span class="client-kicker">CONTA</span><h1>Meu perfil</h1><p>Atualize seus dados para vincular sua conta ao Minecraft.</p></div></div>
+            <form class="profile-form" id="profile-form"><label>Nome de exibição<input name="name" id="profile-name" required></label><label>Nick no Minecraft<input name="minecraftNick" id="profile-minecraft" maxlength="32" placeholder="SeuNick"></label><button class="client-action" type="submit">Salvar perfil</button><p id="profile-message"></p></form>
+          </section>
+        </section>
+      </main>
+    </div>
+    <div class="client-toast" id="client-toast"></div>
+    <script src="client.js"></script>
+  </body>
+</html>

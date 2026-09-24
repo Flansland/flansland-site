@@ -1,0 +1,14 @@
+modules = ["nodejs-24"]
+[nix]
+channel = "stable-25_05"
+packages = ["unzip"]
+
+[[ports]]
+localPort = 5000
+externalPort = 80
+exposeLocalhost = true
+
+[userenv]
+
+[userenv.shared]
+MINECRAFT_API_KEY = "F463GBGDSFNDD6FASF"
