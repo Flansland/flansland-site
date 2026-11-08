@@ -9,7 +9,8 @@ const HOST = process.env.HOST || "127.0.0.1";
 const ADMIN_EMAIL = "rhuanprodutor3@gmail.com";
 const MINECRAFT_API_KEY = process.env.MINECRAFT_API_KEY || "";
 const MINECRAFT_STATUS_TIMEOUT_MS = Math.max(30_000, Number(process.env.MINECRAFT_STATUS_TIMEOUT_MS || 90_000));
-const MINECRAFT_PINGER_HOST = "expressing-pursue.tun.ply.gg:23012";
+const MC_HOST = process.env.MC_HOST || "expressing-pursue.tun.ply.gg";
+const MC_PORT = Number(process.env.MC_PORT || 23012);
 const PUBLIC_URL = String(process.env.PUBLIC_URL || "").replace(/\/+$/, "");
 const DISCORD_SERVER_ID = process.env.DISCORD_SERVER_ID || "1549100473506734160";
 const DISCORD_INVITE_URL = process.env.DISCORD_INVITE_URL || "https://dsc.gg/flansland";
@@ -349,67 +350,61 @@ function minecraftStatusSnapshot() {
   };
 }
 
-async function minecraftPingerStatus() {
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 10_000);
+// ---- Ping direto no servidor Minecraft (Server List Ping) ----
+const net = require("node:net");
 
-  try {
-    const response = await fetch(
-      `https://www.minecraftpinger.com/api/v1/${MINECRAFT_PINGER_HOST}`,
-      {
-        headers: {
-          "User-Agent": "Flansland-Website/1.0",
-          "Accept": "application/json",
-        },
-        signal: controller.signal,
+const varInt = (n) => { const b = []; do { let t = n & 0x7f; n >>>= 7; if (n) t |= 0x80; b.push(t); } while (n); return Buffer.from(b); };
+const pack = (buf) => Buffer.concat([varInt(buf.length), buf]);
+const mcStr = (str) => { const b = Buffer.from(str); return Buffer.concat([varInt(b.length), b]); };
+
+function pingMinecraft(host, port, timeout = 5000) {
+  return new Promise((resolve, reject) => {
+    const socket = net.createConnection({ host, port });
+    let buf = Buffer.alloc(0);
+    socket.setTimeout(timeout, () => { socket.destroy(); reject(new Error("timeout")); });
+    socket.on("error", reject);
+    socket.on("connect", () => {
+      const p = Buffer.alloc(2); p.writeUInt16BE(port);
+      socket.write(pack(Buffer.concat([varInt(0), varInt(765), mcStr(host), p, varInt(1)])));
+      socket.write(pack(varInt(0)));
+    });
+    socket.on("data", (chunk) => {
+      buf = Buffer.concat([buf, chunk]);
+      let off = 0;
+      const readVar = () => { let r = 0, sh = 0, b; do { if (off >= buf.length) throw new RangeError(); b = buf[off++]; r |= (b & 0x7f) << sh; sh += 7; } while (b & 0x80); return r; };
+      try {
+        const len = readVar();
+        if (buf.length - off < len) return;
+        readVar(); // id do pacote
+        const sl = readVar();
+        if (buf.length - off < sl) return;
+        const parsed = JSON.parse(buf.toString("utf8", off, off + sl));
+        socket.destroy();
+        resolve(parsed);
+      } catch (e) {
+        if (!(e instanceof RangeError)) { socket.destroy(); reject(e); }
       }
-    );
+    });
+  });
+}
 
-    if (!response.ok) {
-      throw new Error(`MinecraftPinger HTTP ${response.status}`);
-    }
-
-    const result = await response.json();
-
-    if (result.message !== "ok" || !result.server) {
-      return {
-        online: false,
-        players: 0,
-        max: 0,
-      };
-    }
-
-    return {
-      online: true,
-      players: Number(result.server.players?.online) || 0,
-      max: Number(result.server.players?.max) || 0,
-      ip: result.server.ip || MINECRAFT_PINGER_HOST.split(":")[0],
-      port: Number(result.server.port) || 23012,
-      motd: result.server.motd || "",
-      version: result.server.version || "",
-      ping: Number(result.server.ping) || 0,
-    };
-  } finally {
-    clearTimeout(timeout);
+let mcCache = { at: 0, value: null };
+async function minecraftLive() {
+  if (mcCache.value && Date.now() - mcCache.at < 15000) return mcCache.value; // cache de 15s
+  try {
+    const r = await pingMinecraft(MC_HOST, MC_PORT);
+    mcCache = { at: Date.now(), value: { isOnline: true, online: Number(r.players?.online) || 0, max: Number(r.players?.max) || 0 } };
+  } catch {
+    mcCache = { at: Date.now(), value: { isOnline: false, online: 0, max: 0 } };
   }
+  return mcCache.value;
 }
 
 async function api(request, response, url) {
   const body = ["POST", "PUT", "PATCH"].includes(request.method) ? await readBody(request) : {};
   const route = url.pathname;
-    if (request.method === "GET" && route === "/api/minecraft/pinger") {
-    try {
-      const status = await minecraftPingerStatus();
-      return json(response, 200, status);
-    } catch (error) {
-      console.error("Erro no MinecraftPinger:", error.message);
-
-      return json(response, 200, {
-        online: false,
-        players: 0,
-        max: 0,
-      });
-    }
+  if (request.method === "GET" && route === "/api/players") {
+    return json(response, 200, await minecraftLive());
   }
 
   if (request.method === "GET" && route === "/api/auth/providers") {
@@ -481,7 +476,8 @@ async function api(request, response, url) {
   if (request.method === "GET" && route === "/api/stats") {
     const members = data.users.filter((user) => user.role !== "admin");
     const newestUser = [...members].sort((a, b) => String(b.createdAt).localeCompare(String(a.createdAt)))[0];
-    const minecraftStatus = minecraftStatusSnapshot();
+    const live = await minecraftLive();
+    const minecraftStatus = { ...live, onlinePlayers: live.online, maxPlayers: live.max, stale: !live.isOnline };
     return json(response, 200, {
       members: members.length,
       news: data.news.length,
@@ -489,8 +485,8 @@ async function api(request, response, url) {
       partners: data.partners.length,
       newestMember: newestUser ? newestUser.name : "Nenhuma conta ainda",
       lastMinecraftEntry: latestMinecraftEntry(),
-      minecraftOnline: minecraftStatus.online,
-      minecraftMax: minecraftStatus.max,
+      minecraftOnline: live.online,
+      minecraftMax: live.max,
       minecraftStatus,
     });
   }

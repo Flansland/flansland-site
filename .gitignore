@@ -1,1 +1,4 @@
+.cache/
+.replit
 data.json
+node_modules/

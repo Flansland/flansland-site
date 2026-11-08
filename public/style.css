@@ -63,3 +63,11 @@ body{background:var(--bg);color:var(--ink)}
 .hero{background:radial-gradient(circle at 50% 32%,#008b8b55,transparent 27%),radial-gradient(circle at 15% 55%,#008b8b38,transparent 25%),linear-gradient(135deg,#08090e,#10292d 62%,#062e34)}
 .nav-button,.about-button,.auth-submit{background:linear-gradient(100deg,#008b8b,#006568);box-shadow:0 10px 22px #008b8b45}.eyebrow,.callout-label{color:#70ded3}.text-link,.read-more{color:#70ded3}.announcement{border-left-color:#008b8b;background:linear-gradient(100deg,#123c40,#102b31)}.announcement-icon{background:#008b8b}.dynamic-item-mark,.store-item-mark{background:linear-gradient(135deg,#006568,#008b8b)}.partner-card img,.partner-logo{background:linear-gradient(135deg,#006568,#008b8b)}.about-button{color:#fff}
 .developer-credit{display:flex;align-items:center;gap:10px;margin-top:18px;color:#91a9ac;font-size:10px}.developer-credit img{width:38px;height:38px;border:2px solid #008b8b;border-radius:50%;object-fit:cover}.developer-credit strong{color:#70ded3;font-size:12px}
+/* Status do servidor: verde = online, vermelho = offline */
+.online-badge{background:#e2faed;color:#1caa61;font-weight:800}
+.online-badge.checking{background:#eef2f2;color:#729093}
+.online-badge.offline{background:#fde8e8;color:#d93636}
+.status-dot.offline{background:#ff6b6b}
+body.dark-mode .online-badge{background:#123e3b;color:#6ff1d0}
+body.dark-mode .online-badge.checking{background:#1d2a2c;color:#8aa3a6}
+body.dark-mode .online-badge.offline{background:#5b3030;color:#ffb4b4}

@@ -101,7 +101,7 @@
           <section class="panel server-panel">
             <div class="panel-heading">
               <span>Status do servidor</span>
-              <span class="online-badge" id="server-status-badge">VERIFICANDO...</span>
+              <span class="online-badge checking" id="server-status-badge">VERIFICANDO...</span>
             </div>
             <div class="server-status">
               <div class="server-status-icon">✦</div>
@@ -116,12 +116,6 @@
             </div>
             <div class="progress"><span id="server-progress" style="width: 0%"></span></div>
             <button class="outline-button copy-button" data-copy="rede.flansland.fun" type="button">Copiar IP</button>
-            <small class="minecraftpinger-credit">
-  Status do servidor fornecido por
-  <a href="https://www.minecraftpinger.com" target="_blank" rel="noopener noreferrer">
-    MinecraftPinger
-  </a>.
-</small>
           </section>
 
           <section class="panel community-panel" id="comunidade">
@@ -237,6 +231,35 @@
     <div class="toast" id="toast" role="status" aria-live="polite">IP copiado!</div>
 
 <script src="script.js"></script>
+
+<script>
+async function atualizarJogadores() {
+  const $ = (id) => document.getElementById(id);
+  const badge = $("server-status-badge");
+  const dot = document.querySelector(".status-dot");
+  const aplicar = (online, texto) => {
+    badge.textContent = online ? "ONLINE" : "OFFLINE";
+    badge.classList.toggle("offline", !online);
+    if (dot) dot.classList.toggle("offline", !online);
+    badge.classList.remove("checking");
+    $("player-count").textContent = texto;
+  };
+  try {
+    const r = await fetch("/api/players", { cache: "no-store" });
+    const d = await r.json();
+    const label = d.isOnline ? `${d.online} / ${d.max}` : "0 / 0";
+    $("online-number").textContent = label;
+    $("stats-online-number").textContent = label;
+    $("server-progress").style.width =
+      d.isOnline && d.max ? `${Math.min(100, (d.online / d.max) * 100)}%` : "0%";
+    aplicar(d.isOnline, d.isOnline ? `${d.online} online • Clique para jogar` : "Servidor offline");
+  } catch {
+    aplicar(false, "Servidor offline");
+  }
+}
+atualizarJogadores();
+setInterval(atualizarJogadores, 15000);
+</script>
 
 </body>
 </html>
