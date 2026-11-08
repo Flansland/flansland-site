@@ -171,23 +171,6 @@ async function loadPublicContent() {
     const statsMembers = document.querySelector("#registered-count");
     const newestMember = document.querySelector("#newest-member");
     if (statsMembers) statsMembers.textContent = stats.members;
-    const onlineNumber = document.querySelector("#online-number");
-     const onlinePlayers = Number(stats.minecraftOnline || 0);
-     const maxPlayers = Number(stats.minecraftMax || 0);
-     const minecraftStatus = stats.minecraftStatus || {};
-     const onlineLabel = maxPlayers ? `${onlinePlayers} / ${maxPlayers}` : String(onlinePlayers);
-     if (onlineNumber) onlineNumber.textContent = onlineLabel;
-     const statsOnlineNumber = document.querySelector("#stats-online-number");
-     if (statsOnlineNumber) statsOnlineNumber.textContent = onlineLabel;
-     const playerCount = document.querySelector("#player-count");
-     if (playerCount) playerCount.textContent = `${onlinePlayers} online • Clique para jogar`;
-     const progress = document.querySelector(".progress span");
-     if (progress) progress.style.width = `${maxPlayers ? Math.min(100, (onlinePlayers / maxPlayers) * 100) : 0}%`;
-    const onlineBadge = document.querySelector(".online-badge");
-    if (onlineBadge) {
-      onlineBadge.textContent = minecraftStatus.isOnline ? "ONLINE" : "OFFLINE";
-      onlineBadge.classList.toggle("offline", !minecraftStatus.isOnline);
-    }
     const discordWidget = document.querySelector("[data-discord-widget]");
     if (discordWidget && discordConfig.widgetUrl) discordWidget.src = discordConfig.widgetUrl;
     document.querySelectorAll('a[href="https://dsc.gg/flansland"]').forEach((link) => {
