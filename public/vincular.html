@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="pt-BR">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Vincular conta • Flansland</title><link rel="icon" href="assets/flansland-logo.png"><link rel="stylesheet" href="style.css"><link rel="stylesheet" href="catalog.css"><link rel="stylesheet" href="catalog-theme.css"><link rel="stylesheet" href="validar.css"></head>
+<body class="catalog-page"><div class="catalog-shell">
+<nav class="catalog-nav"><a class="brand" href="/"><img src="assets/flansland-logo.png" alt=""><span>Flansland</span></a><div class="catalog-links"><a href="/">Início</a><a href="/noticias">Notícias</a><a href="/loja">Loja</a><a href="/comunidade">Comunidade</a><a href="/regras">Regras</a><a href="https://dsc.gg/flansland" target="_blank" rel="noreferrer">Discord ↗</a></div></nav>
+<main class="catalog-main vinc-main">
+  <h1>Vincular conta</h1>
+  <section class="vinc-card">
+    <header id="vinc-head">Informe seus nicks</header>
+    <form id="vinc-form" class="vinc-body" novalidate>
+      <input id="mc" placeholder="Seu nick no Minecraft" maxlength="16" autocomplete="off" required>
+      <input id="dc" placeholder="Seu usuário no Discord" maxlength="32" autocomplete="off" required>
+      <div id="captcha"></div>
+      <button class="vinc-button" id="vinc-btn" type="submit">Validar</button>
+      <p class="vinc-msg" id="vinc-msg" role="status"></p>
+    </form>
+    <div class="vinc-body" id="vinc-wait" hidden>
+      <p>Entre no servidor e digite:</p>
+      <button class="vinc-code" id="vinc-code" type="button" title="Copiar"></button>
+      <p class="vinc-small">O código vale por 10 minutos. Esta página atualiza sozinha.</p>
+    </div>
+    <div class="vinc-body" id="vinc-done" hidden>
+      <p class="vinc-ok">Conta vinculada!</p>
+      <p id="vinc-roles"></p>
+      <a class="vinc-button" href="/">Voltar ao início</a>
+    </div>
+  </section>
+</main>
+<footer class="catalog-footer">© <span id="vinc-year"></span> Flansland · <a href="https://dsc.gg/flansland">💬 Discord</a><span class="catalog-socials"> · <a href="https://www.tiktok.com/@flansland.fun" target="_blank" rel="noreferrer">🎵 TikTok</a> · <a href="https://www.instagram.com/flansland.fun/" target="_blank" rel="noreferrer">📸 Instagram</a> · <a href="https://www.twitch.tv/flansland" target="_blank" rel="noreferrer">🎮 Twitch</a> · <a href="mailto:flansland.fun@gmail.com">✉️ Gmail</a> · <a href="https://www.youtube.com/@Flansland-fun" target="_blank" rel="noreferrer">▶️ YouTube</a></span></footer></div>
+<script>
+const $ = (id) => document.getElementById(id);
+let widget = null;
+const show = (id, title) => { ["vinc-form", "vinc-wait", "vinc-done"].forEach((x) => { $(x).hidden = x !== id; }); $("vinc-head").textContent = title; };
+
+fetch("/api/vincular/config").then((r) => r.json()).then(({ sitekey }) => {
+  if (!sitekey) return;
+  const script = document.createElement("script");
+  script.src = "https://js.hcaptcha.com/1/api.js?render=explicit";
+  script.async = true;
+  script.onload = () => { widget = hcaptcha.render("captcha", { sitekey, theme: "dark" }); };
+  document.head.appendChild(script);
+}).catch(() => {});
+
+$("vinc-code").addEventListener("click", () => navigator.clipboard?.writeText($("vinc-code").textContent).then(() => { $("vinc-msg").textContent = ""; }));
+
+$("vinc-form").addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const msg = $("vinc-msg");
+  msg.textContent = "Aguarde...";
+  $("vinc-btn").disabled = true;
+  try {
+    const res = await fetch("/api/vincular/iniciar", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ mc: $("mc").value.trim(), dc: $("dc").value.trim(), captcha: widget !== null ? hcaptcha.getResponse(widget) : "" }),
+    });
+    const data = await res.json();
+    if (!res.ok) { msg.textContent = data.error || "Não foi possível iniciar."; if (widget !== null) hcaptcha.reset(widget); return; }
+    $("vinc-code").textContent = data.command;
+    show("vinc-wait", "Confirme dentro do jogo");
+    esperar(data.id);
+  } catch { msg.textContent = "Erro de conexão. Tente novamente."; }
+  finally { $("vinc-btn").disabled = false; }
+});
+
+function esperar(id) {
+  const timer = setInterval(async () => {
+    try {
+      const data = await (await fetch(`/api/vincular/status?id=${id}`, { cache: "no-store" })).json();
+      if (data.status === "pending") return;
+      clearInterval(timer);
+      if (data.status === "done") {
+        $("vinc-roles").textContent = data.roles.length ? `Cargos liberados no Discord: ${data.roles.join(", ")}.` : "Você não tem cargos especiais no Minecraft para sincronizar.";
+        if (data.error) $("vinc-roles").textContent += ` ${data.error}`;
+        show("vinc-done", "Tudo certo");
+      } else {
+        show("vinc-form", "Informe seus nicks");
+        $("vinc-msg").textContent = "O código expirou. Valide novamente.";
+        if (widget !== null) hcaptcha.reset(widget);
+      }
+    } catch {}
+  }, 3000);
+}
+document.getElementById("vinc-year").textContent = new Date().getFullYear();
+</script></body></html>

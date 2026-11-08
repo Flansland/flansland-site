@@ -400,6 +400,66 @@ async function minecraftLive() {
   return mcCache.value;
 }
 
+// ---- Vínculo Minecraft ↔ Discord --------------------------------------------
+// Variáveis de ambiente: DISCORD_BOT_TOKEN (bot no servidor com "Gerenciar cargos"; o cargo do bot
+// precisa ficar ACIMA dos cargos entregues), HCAPTCHA_SITEKEY + HCAPTCHA_SECRET (opcional).
+// Plugin: o comando /vincular CODIGO envia POST /api/minecraft/vincular (header x-api-key) com
+// { "code": "ABC123", "nick": "Jogador", "uuid": "...", "groups": ["midia", "vip"] }.
+const DISCORD_BOT_TOKEN = process.env.DISCORD_BOT_TOKEN || "";
+const HCAPTCHA_SITEKEY = process.env.HCAPTCHA_SITEKEY || "";
+const HCAPTCHA_SECRET = process.env.HCAPTCHA_SECRET || "";
+// grupo/tag no Minecraft  ->  ID do cargo no Discord (edite aqui ou use DISCORD_ROLE_MAP em JSON)
+let extraRoles = {};
+try { extraRoles = JSON.parse(process.env.DISCORD_ROLE_MAP || "{}"); } catch {}
+const ROLE_MAP = Object.fromEntries(Object.entries({ midia: "123456789", ...extraRoles }).map(([k, v]) => [k.toLowerCase(), String(v)]));
+const pendingLinks = new Map();
+const linkHits = new Map();
+
+function tooManyLinkRequests(request) {
+  const ip = String(request.headers["x-forwarded-for"] || request.socket.remoteAddress || "").split(",")[0].trim();
+  const now = Date.now();
+  const hits = (linkHits.get(ip) || []).filter((t) => now - t < 600_000);
+  hits.push(now);
+  linkHits.set(ip, hits);
+  for (const [key, link] of pendingLinks) if (link.expires < now) pendingLinks.delete(key);
+  return hits.length > 10;
+}
+
+async function verifyCaptcha(token) {
+  if (!HCAPTCHA_SECRET) return true;
+  if (!token) return false;
+  try {
+    const res = await fetch("https://api.hcaptcha.com/siteverify", {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams({ secret: HCAPTCHA_SECRET, response: token }),
+    });
+    return (await res.json()).success === true;
+  } catch { return false; }
+}
+
+const discordApi = (apiPath, options = {}) => fetch(`https://discord.com/api/v10${apiPath}`, {
+  ...options,
+  headers: { Authorization: `Bot ${DISCORD_BOT_TOKEN}`, "Content-Type": "application/json", ...(options.headers || {}) },
+});
+
+async function findDiscordMember(name) {
+  const res = await discordApi(`/guilds/${DISCORD_SERVER_ID}/members/search?query=${encodeURIComponent(name)}&limit=10`);
+  if (!res.ok) throw new Error(`Discord HTTP ${res.status}`);
+  const wanted = name.toLowerCase();
+  const found = (await res.json()).filter((m) => [m.user.username, m.user.global_name, m.nick].some((n) => String(n || "").toLowerCase() === wanted));
+  return found.length === 1 ? found[0].user : null;
+}
+
+async function giveRoles(userId, roleIds) {
+  const failed = [];
+  for (const roleId of roleIds) {
+    const res = await discordApi(`/guilds/${DISCORD_SERVER_ID}/members/${userId}/roles/${roleId}`, { method: "PUT", headers: { "X-Audit-Log-Reason": "Vinculo Minecraft" } });
+    if (!res.ok) failed.push(roleId);
+  }
+  return failed;
+}
+
 async function api(request, response, url) {
   const body = ["POST", "PUT", "PATCH"].includes(request.method) ? await readBody(request) : {};
   const route = url.pathname;
@@ -489,6 +549,50 @@ async function api(request, response, url) {
       minecraftMax: live.max,
       minecraftStatus,
     });
+  }
+
+  if (request.method === "GET" && route === "/api/vincular/config") return json(response, 200, { sitekey: HCAPTCHA_SITEKEY });
+
+  if (request.method === "POST" && route === "/api/vincular/iniciar") {
+    if (!DISCORD_BOT_TOKEN) return json(response, 503, { error: "O vínculo ainda não foi configurado no servidor." });
+    if (tooManyLinkRequests(request)) return json(response, 429, { error: "Muitas tentativas. Aguarde alguns minutos." });
+    const mc = text(body.mc).slice(0, 16);
+    const dc = text(body.dc).replace(/^@/, "").slice(0, 32);
+    if (!/^[A-Za-z0-9_]{3,16}$/.test(mc)) return json(response, 400, { error: "Nick do Minecraft inválido." });
+    if (dc.length < 2) return json(response, 400, { error: "Informe seu usuário do Discord." });
+    if (!(await verifyCaptcha(body.captcha))) return json(response, 400, { error: "Confirme que você é humano." });
+    let member;
+    try { member = await findDiscordMember(dc); } catch { return json(response, 502, { error: "Não foi possível consultar o Discord agora. Tente novamente." }); }
+    if (!member) return json(response, 404, { error: "Não encontrei esse usuário no Discord da Flansland. Entre no servidor e confira o nome." });
+    const id = crypto.randomBytes(16).toString("hex");
+    const code = Array.from(crypto.randomBytes(6), (b) => "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"[b % 32]).join("");
+    pendingLinks.set(id, { code, mc, discordId: member.id, status: "pending", roles: [], error: "", expires: Date.now() + 600_000 });
+    return json(response, 201, { id, command: `/vincular ${code}`, minutes: 10 });
+  }
+
+  if (request.method === "GET" && route === "/api/vincular/status") {
+    const link = pendingLinks.get(url.searchParams.get("id"));
+    if (!link || link.expires < Date.now()) return json(response, 200, { status: "expired" });
+    return json(response, 200, { status: link.status, roles: link.roles, error: link.error });
+  }
+
+  if (request.method === "POST" && route === "/api/minecraft/vincular") {
+    if (!pluginIsAuthorized(request)) return json(response, 401, { error: "Chave da API do Minecraft inválida." });
+    const code = text(body.code).toUpperCase();
+    const nick = text(body.nick).slice(0, 16);
+    const link = [...pendingLinks.values()].find((l) => l.code === code && l.status === "pending" && l.expires > Date.now());
+    if (!link) return json(response, 404, { error: "Código inválido ou expirado." });
+    if (link.mc.toLowerCase() !== nick.toLowerCase()) return json(response, 403, { error: "Este código foi pedido para outro nick." });
+    const groups = (Array.isArray(body.groups) ? body.groups : []).map((g) => String(g).toLowerCase());
+    const matched = [...new Set(groups.filter((g) => ROLE_MAP[g]))];
+    const failed = await giveRoles(link.discordId, matched.map((g) => ROLE_MAP[g]));
+    link.roles = matched.filter((g) => !failed.includes(ROLE_MAP[g]));
+    link.error = failed.length ? "Alguns cargos não puderam ser entregues. Avise a equipe." : "";
+    link.status = "done";
+    data.links = (data.links || []).filter((l) => l.discordId !== link.discordId && l.mc.toLowerCase() !== link.mc.toLowerCase());
+    data.links.push({ mc: link.mc, uuid: text(body.uuid).slice(0, 64), discordId: link.discordId, roles: link.roles, at: new Date().toISOString() });
+    writeData(data);
+    return json(response, 200, { ok: true, roles: link.roles });
   }
 
   if (request.method === "POST" && route === "/api/auth/setup") {
@@ -710,6 +814,7 @@ function serveStatic(request, response, url) {
   if (pathname === "/noticias" || pathname === "/noticias/") pathname = "/news.html";
   if (pathname === "/regras" || pathname === "/regras/") pathname = "/rules.html";
   if (pathname === "/comunidade" || pathname === "/comunidade/") pathname = "/community.html";
+  if (pathname === "/vincular" || pathname === "/vincular/") pathname = "/vincular.html";
   const filePath = path.resolve(PUBLIC_DIR, `.${pathname}`);
   if (!filePath.startsWith(PUBLIC_DIR)) return json(response, 403, { error: "Acesso negado." });
   fs.readFile(filePath, (error, content) => {

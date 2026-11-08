@@ -1,0 +1,17 @@
+.vinc-main{display:flex;flex-direction:column;align-items:center;text-align:center}
+.vinc-main h1{margin:0 0 22px;font-size:32px}
+.vinc-card{width:min(480px,100%);overflow:hidden;border:1px solid #ffffff14;border-radius:28px;background:#121c1f;box-shadow:0 20px 60px #0008}
+.vinc-card header{padding:20px;border-bottom:1px solid #ffffff12;background:#17292c;font-size:14px;font-weight:800}
+.vinc-body{display:flex;flex-direction:column;align-items:center;gap:14px;padding:28px 24px 30px}
+.vinc-body p{margin:0;color:#c3dddd;font-size:13px}
+.vinc-body input{width:min(300px,100%);padding:12px 20px;border:2px solid transparent;border-radius:999px;background:#fff;color:#15252b;font:inherit;font-size:14px;text-align:center}
+.vinc-body input:focus-visible{outline:0;border-color:#70ded3}
+.vinc-button{display:inline-block;padding:12px 30px;border:1px solid #70ded3;border-radius:999px;background:linear-gradient(100deg,#008b8b,#006568);color:#fff;font:inherit;font-size:14px;font-weight:800;cursor:pointer}
+.vinc-button:hover:not(:disabled){filter:brightness(1.12)}
+.vinc-button:disabled{opacity:.6;cursor:wait}
+.vinc-button:focus-visible,.vinc-code:focus-visible{outline:2px solid #70ded3;outline-offset:3px}
+.vinc-msg{min-height:18px;color:#ffb4b4!important}
+.vinc-code{padding:14px 26px;border:1px dashed #70ded3;border-radius:14px;background:#0b2023;color:#a3fff5;font:inherit;font-size:22px;font-weight:800;letter-spacing:1px;cursor:copy}
+.vinc-small{font-size:11px!important;color:#9db4b6!important}
+.vinc-ok{color:#72f3a7!important;font-size:18px!important;font-weight:800}
+@media(max-width:480px){.vinc-main h1{font-size:26px}.vinc-code{font-size:18px}}
