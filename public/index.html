@@ -238,57 +238,5 @@
 
 <script src="script.js"></script>
 
-<script>
-async function atualizarStatusMinecraft() {
-    const badge = document.getElementById("server-status-badge");
-    const onlineNumber = document.getElementById("online-number");
-    const statsOnlineNumber = document.getElementById("stats-online-number");
-    const playerCount = document.getElementById("player-count");
-    const progress = document.getElementById("server-progress");
-
-    try {
-        const response = await fetch("/api/minecraft/pinger", {
-            cache: "no-store"
-        });
-
-        const data = await response.json();
-
-        if (data.online) {
-            const online = Number(data.players) || 0;
-            const max = Number(data.max) || 0;
-
-            badge.textContent = "ONLINE";
-            onlineNumber.textContent = `${online} / ${max}`;
-            statsOnlineNumber.textContent = `${online} / ${max}`;
-            playerCount.textContent = `${online} online • Clique para jogar`;
-
-            const porcentagem = max > 0
-                ? Math.min(100, (online / max) * 100)
-                : 0;
-
-            progress.style.width = `${porcentagem}%`;
-        } else {
-            servidorOffline();
-        }
-    } catch (erro) {
-        console.error("Erro ao consultar status:", erro);
-        servidorOffline();
-    }
-}
-
-function servidorOffline() {
-    document.getElementById("server-status-badge").textContent = "OFFLINE";
-    document.getElementById("online-number").textContent = "0 / 0";
-    document.getElementById("stats-online-number").textContent = "0 / 0";
-    document.getElementById("player-count").textContent =
-        "0 online • Servidor offline";
-    document.getElementById("server-progress").style.width = "0%";
-}
-
-atualizarStatusMinecraft();
-
-setInterval(atualizarStatusMinecraft, 120000);
-</script>
-
 </body>
 </html>
